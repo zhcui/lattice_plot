@@ -8,6 +8,7 @@ written by Zhihao Cui zcui@caltech.edu
 import os, sys
 import numpy as np
 import scipy.linalg as la
+import itertools as it
 
 # import the implementation of the matrix factorization that consider bias
 import matplotlib.pyplot as plt
@@ -24,6 +25,39 @@ from time import time
 
 #plt.style.use('ggplot')
 
+# TODO
+# 1. spin arrow
+# 2. circle size
+# 3. name of atom
+# 4. test pure hubbard pairing pattern 
+
+def plot_atom(plt, r, rad, color):
+    plt.scatter(r[0], r[1], \
+            c = color, s = 1000 * rad, \
+            edgecolors='black', linewidths=1)
+    return plt
+
+def plot_bond(plt, r0, r1, val, color_list=['C2', 'C4']):
+    x, y = zip(r0, r1)
+    if val >= 0.0:
+        cidx = 0
+    else:
+        cidx = -1
+    plt.plot(x, y, color=color_list[cidx], linestyle='-', linewidth=val*5000, alpha=0.55, zorder=0)
+    return plt
+
+def plot_pairing(plt, lattice, rab, idx_list, bond_thr = 2.1):
+    s = 0.5**0.5
+    neighborDist = lattice.neighborDist
+    for i, j in it.combinations_with_replacement(idx_list, 2):
+        val = s*(rab[i, j] + rab[j, i])
+        r0 = lattice.site_idx2pos(i)
+        r1 = lattice.site_idx2pos(j)
+        if la.norm(r1 - r0) > bond_thr:
+            continue
+        plt = plot_bond(plt, r0, r1, val)
+    return plt
+
 def plot_lattice(lattice, **kwargs):
     color_list = ['gold', 'C3']
     rad_list = [0.8, 0.4]
@@ -39,7 +73,6 @@ def plot_lattice(lattice, **kwargs):
     #color_dict = dict(zip(atom_ind, color_list))
     #color_plot = [color_dict[name] for name in atom_names]
 
-    
     #lat_coords[0][lat_coords[0] > lat_size[0] // 2] -= lat_size[0]
     #lat_coords[1][lat_coords[1] > lat_size[1] // 2] -= lat_size[1]
    
@@ -76,10 +109,9 @@ def plot_lattice(lattice, **kwargs):
     #ax.axhline(linewidth=4, color="g") draw a line along x-axis
     #plt.grid() # add grid
     #plt.set_axis_bgcolor('white')
-    bath_plot = plt.scatter(lat_coords[0], lat_coords[1], \
+    plt.scatter(lat_coords[0], lat_coords[1], \
             c = color_plot, s = 1000 * rad_plot, \
             edgecolors='black', linewidths=1)
-    plt.show()
     return plt
     
 
@@ -93,7 +125,13 @@ if __name__ == '__main__':
     #LatSize = [4, 4]
     #ImpSize = [2, 2]
     #Lat = dmet.SquareLattice(*(LatSize + ImpSize))
-    
-    plot_lattice(Lat)
+    nscsites = Lat.supercell.nsites
 
+    plt = plot_lattice(Lat)
 
+    rab = (np.random.random((nscsites, nscsites)) - 0.5) * 0.01
+    idx_list = [0, 3, 6, 9]
+    plt = plot_pairing(plt, Lat, rab, idx_list, bond_thr=2.1)
+    plt = plot_atom(plt, [1.0, 0.0], rad=0.4, color='C3')
+    #plt = pairing_bond(plt, (0.0, 0.0), (1.0, 0.0), 0.005)
+    plt.show()
