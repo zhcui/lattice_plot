@@ -168,8 +168,9 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     print "rho_Oo"
     print rho_Oo
 
-    m_Oi = np.abs(rho_Oi_a - rho_Oi_b) * 0.5
-    m_Oo = np.abs(rho_Oo_a - rho_Oo_b) * 0.5
+    m_Cu = (rho_Cu_a - rho_Cu_b) * 0.5
+    m_Oi = (rho_Oi_a - rho_Oi_b) * 0.5
+    m_Oo = (rho_Oo_a - rho_Oo_b) * 0.5
 
 
     print "rho_Cu"
@@ -177,9 +178,9 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     print "rho_O"
     print np.average([rho_Oi, rho_Oo])
     print "m_Cu"
-    print np.average(np.abs(rho_Cu_a - rho_Cu_b) * 0.5)
+    print np.average(np.abs(m_Cu))
     print "m_O"
-    print np.average([m_Oi, m_Oo])
+    print np.average(np.abs([m_Oi, m_Oo]))
 
     
     import libdmet.utils.logger as log
@@ -191,17 +192,46 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     #ImpSize = [2, 2]
     #Lat = dmet.SquareLattice(*(LatSize + ImpSize))
     nscsites = Lat.supercell.nsites
+    Cu_list = [0, 3, 6, 9]
+    Oi_list = [2, 5, 8, 11]
+    Oo_list = [1, 4, 7, 10]
+    Oa_list = [12, 13, 14, 15]
+
+    Oa_pos = [[4.0, 1.0], [1.0, 0.0], [0.0, 3.0], [3.0, 4.0]]
+    rho_Oa = rho_Oo.copy()
 
     plt = plot_lattice(Lat)
+    plt = plot_atom_all(plt, Lat, Cu_list, 2.0-rho_Cu, ['gold']*len(Cu_list))
+    plt = plot_atom_all(plt, Lat, Oi_list, 2.0-rho_Oi, ['C3']*len(Oi_list))
+    plt = plot_atom_all(plt, Lat, Oo_list, 2.0-rho_Oo, ['C3']*len(Oo_list))
     
+    plt = plot_atom_by_pos(plt, Oa_pos, 2.0-rho_Oa, ['C3']*len(Oa_pos), alpha=0.55)
+    plt = plot_spin_by_pos(plt, Oa_pos, m_Oo, alpha=0.55)
+    
+
     #print rab
     #rab = (np.random.random((nscsites, nscsites)) - 0.5) * 0.01
-    idx_list = [0, 3, 6, 9]
-    plt = plot_pairing(plt, Lat, rab, idx_list, bond_thr=2.1)
-    plt = plot_atom(plt, [1.0, 0.0], rad=0.4, color='C3')
-    #plt = pairing_bond(plt, (0.0, 0.0), (1.0, 0.0), 0.005)
-    plt.show()
+    #idx_list = [0, 3, 6, 9]
+    #plt = plot_atom(plt, [1.0, 0.0], rad=0.4, color='C3')
+    #plt = plot_pairing(plt, Lat, rab, Cu_list, bond_thr=2.1) # Cu-Cu pairing
+    #plt = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
+    #        bond_thr=2.0+0.01, bond_min=2.0-0.01) # O-O pairing
+    plt = plot_pairing_by_pos(plt, Lat, rab, Cu_list + Oi_list + Oo_list + Oa_list, \
+            bond_thr=1.42, bond_min=0.0) # nearest neighbor pairing
 
+    
+    plot_spin_all(plt, Lat, Cu_list, m_Cu, scal=4.5)
+    plot_spin_all(plt, Lat, Oi_list, m_Oi, scal=4.5)
+    plot_spin_all(plt, Lat, Oo_list, m_Oo, scal=4.5)
+
+    cwd = os.getcwd().split('/')
+    #plt = pairing_bond(plt, (0.0, 0.0), (1.0, 0.0), 0.005)
+    #plt.show()
+    #plt.savefig('Cu-Cu-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
+    #plt.savefig('O-O-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
+    plt.savefig('nearest-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
+    #plt.savefig('Cu-Cu-pairing.eps')
+    #plt.savefig('Cu-Cu-pairing.pdf', format='pdf', facecolor=None, edgecolor=None)
 
 
     exit()

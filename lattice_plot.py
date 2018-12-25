@@ -29,17 +29,29 @@ from time import time
 # 2. circle size
 # 4. test pure hubbard pairing pattern 
 
-def plot_name(plt, r, name, fontsize=15):
-    plt.text(r[0], r[1], name, horizontalalignment='center', verticalalignment='center', fontsize=fontsize)
+def plot_name(plt, r, name, fontsize=15, **kwargs):
+    plt.text(r[0], r[1], name, horizontalalignment='center', verticalalignment='center', \
+            fontsize=fontsize, **kwargs)
     return plt
 
-def plot_atom(plt, r, rad, color):
+def plot_atom(plt, r, rad, color, **kwargs):
     plt.scatter(r[0], r[1], \
-            c = color, s = 1000 * rad, \
-            edgecolors='black', linewidths=1)
+            c = color, s = np.sqrt(1000 * rad) * 20, \
+            edgecolors='black', linewidths=1, **kwargs)
     return plt
 
-def plot_spin(plt, r, ms, scal=5.0):
+def plot_atom_all(plt, lattice, idx_list, rad_list, color_list, **kwargs):
+    for idx, rad, color in zip(idx_list, rad_list, color_list):
+        r = lattice.site_idx2pos(idx)
+        plt = plot_atom(plt, r, rad, color, **kwargs)
+    return plt
+
+def plot_atom_by_pos(plt, pos_list, rad_list, color_list, **kwargs):
+    for r, rad, color in zip(pos_list, rad_list, color_list):
+        plt = plot_atom(plt, r, rad, color, **kwargs)
+    return plt
+
+def plot_spin(plt, r, ms, scal=4.0, **kwargs):
     if ms > 0.0:
         dx = 0.0
         dy = np.abs(ms) * 0.5 * scal
@@ -48,28 +60,67 @@ def plot_spin(plt, r, ms, scal=5.0):
         dx = 0.0
         dy = -np.abs(ms) * 0.5 * scal
         r[1] -= dy*0.5
-    plt.arrow(r[0], r[1], dx, dy, width=0.05, head_width=0.16, head_length=0.13, length_includes_head=True, color='black')
+    plt.arrow(r[0], r[1], dx, dy, width=0.05, head_width=0.16, head_length=0.13, \
+            length_includes_head=False, color='black', **kwargs)
     return plt
 
-def plot_bond(plt, r0, r1, val, color_list=['C2', 'C4']):
+def plot_spin_all(plt, lattice, idx_list, ms_list, scal=4.0, **kwargs):
+    for idx, ms in zip(idx_list, ms_list):
+        r = lattice.site_idx2pos(idx)
+        plt = plot_spin(plt, r, ms, scal=scal, **kwargs)
+    return plt
+
+def plot_spin_by_pos(plt, pos_list, ms_list, scal=4.0, **kwargs):
+    for r, ms in zip(pos_list, ms_list):
+        plt = plot_spin(plt, r, ms, scal=scal, **kwargs)
+    return plt
+
+def plot_bond(plt, r0, r1, val, color_list=['C2', 'C4'], **kwargs):
     x, y = zip(r0, r1)
     if val >= 0.0:
         cidx = 0
     else:
         cidx = -1
-    plt.plot(x, y, color=color_list[cidx], linestyle='-', linewidth=val*1000, alpha=0.55, zorder=0)
+    plt.plot(x, y, color=color_list[cidx], linestyle='-', linewidth=val*1000, \
+            alpha=0.65, zorder=0, **kwargs)
     return plt
 
-def plot_pairing(plt, lattice, rab, idx_list, bond_thr = 2.1):
+def plot_pairing(plt, lattice, rab, idx_list, bond_thr = 2.1, bond_min=0.0, **kwargs):
     s = 0.5**0.5
     neighborDist = lattice.neighborDist
-    for i, j in it.combinations_with_replacement(idx_list, 2):
+    #for i, j in it.combinations_with_replacement(idx_list, 2):
+    for i, j in it.combinations(idx_list, 2):
         val = s*(rab[i, j] + rab[j, i])
         r0 = lattice.site_idx2pos(i)
         r1 = lattice.site_idx2pos(j)
-        if la.norm(r1 - r0) > bond_thr:
+        if la.norm(r1 - r0) > bond_thr or la.norm(r1 - r0) < bond_min:
             continue
-        plt = plot_bond(plt, r0, r1, val)
+        plt = plot_bond(plt, r0, r1, val, **kwargs)
+    return plt
+
+def plot_pairing_by_pos(plt, lattice, rab, idx_list, bond_thr = 2.1, bond_min=0.0, **kwargs):
+    s = 0.5**0.5
+    neighborDist = lattice.neighborDist
+    #for i, j in it.combinations_with_replacement(idx_list, 2):
+    # Oa corresponds to [12, 13, 14, 15]
+    idx_dict = {12: 1, 13: 4, 14:7, 15:10}
+    Oa_pos = np.asarray([[4.0, 1.0], [1.0, 0.0], [0.0, 3.0], [3.0, 4.0]])
+    
+    for i_, j_ in it.combinations(idx_list, 2):
+        i = idx_dict.get(i_, i_)
+        j = idx_dict.get(j_, j_)
+        val = s*(rab[i, j] + rab[j, i])
+        if i_ >= 12:
+            r0 = Oa_pos[i_-12]
+        else:
+            r0 = lattice.site_idx2pos(i)
+        if j_ >= 12:
+            r1 = Oa_pos[j_-12]
+        else:
+            r1 = lattice.site_idx2pos(j)
+        if la.norm(r1 - r0) > bond_thr or la.norm(r1 - r0) < bond_min:
+            continue
+        plt = plot_bond(plt, r0, r1, val, **kwargs)
     return plt
 
 def plot_lattice(lattice, **kwargs):
@@ -90,7 +141,7 @@ def plot_lattice(lattice, **kwargs):
     #lat_coords[0][lat_coords[0] > lat_size[0] // 2] -= lat_size[0]
     #lat_coords[1][lat_coords[1] > lat_size[1] // 2] -= lat_size[1]
    
-    circle_rad = 0.5
+    #circle_rad = 0.5
     fig, ax = plt.subplots()
     #plt.figure(facecolor="white")
     #ax = plt.gca()
@@ -123,9 +174,9 @@ def plot_lattice(lattice, **kwargs):
     #ax.axhline(linewidth=4, color="g") draw a line along x-axis
     #plt.grid() # add grid
     #plt.set_axis_bgcolor('white')
-    plt.scatter(lat_coords[0], lat_coords[1], \
-            c = color_plot, s = 1000 * rad_plot, \
-            edgecolors='black', linewidths=1)
+    #plt.scatter(lat_coords[0], lat_coords[1], \
+    #        c = color_plot, s = 1000 * rad_plot, \
+    #        edgecolors='black', linewidths=1)
     return plt
     
 
