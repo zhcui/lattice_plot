@@ -26,15 +26,29 @@ from time import time
 #plt.style.use('ggplot')
 
 # TODO
-# 1. spin arrow
 # 2. circle size
-# 3. name of atom
 # 4. test pure hubbard pairing pattern 
+
+def plot_name(plt, r, name, fontsize=15):
+    plt.text(r[0], r[1], name, horizontalalignment='center', verticalalignment='center', fontsize=fontsize)
+    return plt
 
 def plot_atom(plt, r, rad, color):
     plt.scatter(r[0], r[1], \
             c = color, s = 1000 * rad, \
             edgecolors='black', linewidths=1)
+    return plt
+
+def plot_spin(plt, r, ms, scal=5.0):
+    if ms > 0.0:
+        dx = 0.0
+        dy = np.abs(ms) * 0.5 * scal
+        r[1] -= dy*0.5
+    else:
+        dx = 0.0
+        dy = -np.abs(ms) * 0.5 * scal
+        r[1] -= dy*0.5
+    plt.arrow(r[0], r[1], dx, dy, width=0.05, head_width=0.16, head_length=0.13, length_includes_head=True, color='black')
     return plt
 
 def plot_bond(plt, r0, r1, val, color_list=['C2', 'C4']):
@@ -43,7 +57,7 @@ def plot_bond(plt, r0, r1, val, color_list=['C2', 'C4']):
         cidx = 0
     else:
         cidx = -1
-    plt.plot(x, y, color=color_list[cidx], linestyle='-', linewidth=val*5000, alpha=0.55, zorder=0)
+    plt.plot(x, y, color=color_list[cidx], linestyle='-', linewidth=val*1000, alpha=0.55, zorder=0)
     return plt
 
 def plot_pairing(plt, lattice, rab, idx_list, bond_thr = 2.1):
@@ -105,7 +119,7 @@ def plot_lattice(lattice, **kwargs):
     ax.spines['right'].set_linewidth(1.0)
     ax.spines['top'].set_linewidth(1.0)
     ax.spines['bottom'].set_linewidth(1.0)
-    
+   
     #ax.axhline(linewidth=4, color="g") draw a line along x-axis
     #plt.grid() # add grid
     #plt.set_axis_bgcolor('white')
@@ -133,5 +147,7 @@ if __name__ == '__main__':
     idx_list = [0, 3, 6, 9]
     plt = plot_pairing(plt, Lat, rab, idx_list, bond_thr=2.1)
     plt = plot_atom(plt, [1.0, 0.0], rad=0.4, color='C3')
+    plt = plot_spin(plt, [1.0, 0.0], -0.3)
+    plt = plot_name(plt, [1.0, 1.0], "Cu")
     #plt = pairing_bond(plt, (0.0, 0.0), (1.0, 0.0), 0.005)
     plt.show()
