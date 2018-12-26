@@ -213,11 +213,13 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     #rab = (np.random.random((nscsites, nscsites)) - 0.5) * 0.01
     #idx_list = [0, 3, 6, 9]
     #plt = plot_atom(plt, [1.0, 0.0], rad=0.4, color='C3')
-    #plt = plot_pairing(plt, Lat, rab, Cu_list, bond_thr=2.1) # Cu-Cu pairing
+    plt = plot_pairing_by_pos(plt, Lat, rab, Cu_list, bond_thr=2.1, bond_min=0.01) # Cu-Cu pairing
     #plt = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
     #        bond_thr=2.0+0.01, bond_min=2.0-0.01) # O-O pairing
-    plt = plot_pairing_by_pos(plt, Lat, rab, Cu_list + Oi_list + Oo_list + Oa_list, \
-            bond_thr=1.42, bond_min=0.0) # nearest neighbor pairing
+    #plt = plot_pairing_by_pos(plt, Lat, rab, Cu_list + Oi_list + Oo_list + Oa_list, \
+    #        bond_thr=1.42, bond_min=0.0) # nearest neighbor pairing
+    plt = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
+            bond_thr=2.0+0.01, bond_min=2.0-0.01) # O-O pairing
 
     
     plot_spin_all(plt, Lat, Cu_list, m_Cu, scal=4.5)
@@ -229,7 +231,7 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     #plt.show()
     #plt.savefig('Cu-Cu-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
     #plt.savefig('O-O-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
-    plt.savefig('nearest-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
+    #plt.savefig('nearest-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
     #plt.savefig('Cu-Cu-pairing.eps')
     #plt.savefig('Cu-Cu-pairing.pdf', format='pdf', facecolor=None, edgecolor=None)
 

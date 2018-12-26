@@ -106,7 +106,9 @@ def plot_pairing_by_pos(plt, lattice, rab, idx_list, bond_thr = 2.1, bond_min=0.
     idx_dict = {12: 1, 13: 4, 14:7, 15:10}
     Oa_pos = np.asarray([[4.0, 1.0], [1.0, 0.0], [0.0, 3.0], [3.0, 4.0]])
     
-    for i_, j_ in it.combinations(idx_list, 2):
+    res = []
+    #for i_, j_ in it.combinations(idx_list, 2):
+    for i_, j_ in it.product(idx_list, idx_list):
         i = idx_dict.get(i_, i_)
         j = idx_dict.get(j_, j_)
         val = s*(rab[i, j] + rab[j, i])
@@ -120,7 +122,27 @@ def plot_pairing_by_pos(plt, lattice, rab, idx_list, bond_thr = 2.1, bond_min=0.
             r1 = lattice.site_idx2pos(j)
         if la.norm(r1 - r0) > bond_thr or la.norm(r1 - r0) < bond_min:
             continue
+        else:
+            res.append((i_, j_, val))
         plt = plot_bond(plt, r0, r1, val, **kwargs)
+    
+    Oi_list = [2, 5, 8, 11]
+    res = [resi for resi in res if (resi[0] < 12 and (not(resi[0] in Oi_list and resi[1]>11)))]
+    #print len(res)
+    print res
+    res.sort()
+    dwv = 0.0
+    for i in range(0, len(res), 2):
+        print
+        print res[i][2]
+        print res[i+1][2]
+        #exit()
+        print 0.25 * (2.*res[i][2] - 2.*res[i+1][2])
+        dwv += np.abs(0.25 * (2.*res[i][2] - 2.*res[i+1][2]))
+    #print res
+    print "DWV"
+    print dwv
+    #exit()
     return plt
 
 def plot_lattice(lattice, **kwargs):
