@@ -12,10 +12,13 @@ import itertools as it
 
 # import the implementation of the matrix factorization that consider bias
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
+
 from collections import defaultdict
 import random as rd
 import operator
 from time import time
+
 #from sklearn.metrics.pairwise import euclidean_distances
 #from sklearn.random_projection import johnson_lindenstrauss_min_dim
 #from sklearn.random_projection import SparseRandomProjection
@@ -50,6 +53,53 @@ def plot_atom_by_pos(plt, pos_list, rad_list, color_list, **kwargs):
     for r, rad, color in zip(pos_list, rad_list, color_list):
         plt = plot_atom(plt, r, rad, color, **kwargs)
     return plt
+
+def plot_p_orb(plt, ax, r, direct='up', phase=["+", "-"]):
+    width = 0.4
+    height = 0.2
+    fontsize = {"+":16, "-":24}
+    if direct == 'up':
+        r0 = [r[0], r[1] + width * 0.54]
+        r1 = [r[0], r[1] - width * 0.54]
+        plot_name(plt, r0, phase[0], fontsize=fontsize[phase[0]])
+        plot_name(plt, r1, phase[1], fontsize=fontsize[phase[1]])
+        angle = 90
+    elif direct == 'down':
+        r0 = [r[0], r[1] + width * 0.54]
+        r1 = [r[0], r[1] - width * 0.54]
+        plot_name(plt, r0, phase[1], fontsize=fontsize[phase[1]])
+        plot_name(plt, r1, phase[0], fontsize=fontsize[phase[0]])
+        angle = 90
+    elif direct == 'left':
+        r0 = [r[0] + width * 0.54, r[1]]
+        r1 = [r[0] - width * 0.54, r[1]]
+        plot_name(plt, r1, phase[0], fontsize=fontsize[phase[0]])
+        plot_name(plt, r0, phase[1], fontsize=fontsize[phase[1]])
+        angle = 0
+    elif direct == 'right':
+        r0 = [r[0] + width * 0.54, r[1]]
+        r1 = [r[0] - width * 0.54, r[1]]
+        plot_name(plt, r1, phase[1], fontsize=fontsize[phase[1]])
+        plot_name(plt, r0, phase[0], fontsize=fontsize[phase[0]])
+        angle = 0
+    else:
+        raise ValueError
+
+    fc_list = ['C0' if p == "+" else 'C3' for p in phase]
+    ellipse1 = Ellipse(xy=r0, width=width, height=height, edgecolor='black', fc=fc_list[0], lw=1.5, angle=angle, alpha=0.8)
+    ellipse2 = Ellipse(xy=r1, width=width, height=height, edgecolor='black', fc=fc_list[1], lw=1.5, angle=angle, alpha=0.8)
+    ax.add_patch(ellipse1)
+    ax.add_patch(ellipse2)
+
+def plot_d_orb(plt, ax, r, direct='up'):
+    if direct == 'up':
+        plot_p_orb(plt, ax, r, direct='up', phase=["+", "+"])
+        plot_p_orb(plt, ax, r, direct='left', phase=["-", "-"])
+    else:
+        plot_p_orb(plt, ax, r, direct='up', phase=["-", "-"])
+        plot_p_orb(plt, ax, r, direct='left', phase=["+", "+"])
+
+
 
 def plot_spin(plt, r, ms, scal=4.0, **kwargs):
     if ms > 0.0:
@@ -171,8 +221,27 @@ def plot_lattice(lattice, **kwargs):
     xmax = np.max(lat_coords[0])
     ymin = np.min(lat_coords[1])
     ymax = np.max(lat_coords[1])
-    plt.xlim(xmin - 0.15*lat_size[0], xmax + 0.15*lat_size[0])
-    plt.ylim(ymin - 0.15*lat_size[0], ymax + 0.15*lat_size[1])
+    if "xleft" in kwargs:
+        xleft = kwargs["xleft"]
+    else:
+        xleft = xmin - 0.15*lat_size[0]
+    if "xright" in kwargs:
+        xright = kwargs["xright"]
+    else:
+        xright = xmax + 0.15*lat_size[0]
+    if "yleft" in kwargs:
+        yleft = kwargs["yleft"]
+    else:
+        yleft = ymin - 0.15*lat_size[1]
+    if "yright" in kwargs:
+        yright = kwargs["yright"]
+    else:
+        yright = ymax + 0.15*lat_size[1]
+
+    plt.xlim(xleft, xright)
+    plt.ylim(yleft, yright)
+    #plt.xlim(xmin - 0.15*lat_size[0], xmax + 0.15*lat_size[0])
+    #plt.ylim(ymin - 0.15*lat_size[1], ymax + 0.15*lat_size[1])
     #plt.xlim(-lat_size[0] / 2 + 1.0, lat_size[0] / 2 + 1.0)
     #plt.ylim(-lat_size[1] / 2 + 1.0, lat_size[1] / 2 + 1.0)
     #plt.xticks(np.arange(-lat_size[0] / 2 , lat_size[0] / 2 + 1.0, 1.0))
@@ -184,15 +253,18 @@ def plot_lattice(lattice, **kwargs):
     ax.axes.get_xaxis().set_visible(False) # do not show tick and labels
     ax.axes.get_yaxis().set_visible(False)
 
-    #ax.spines['top'].set_visible(True)
-    #ax.spines['bottom'].set_visible(True)
-    #ax.spines['left'].set_visible(True)
-    #ax.spines['right'].set_visible(True)
-    ax.spines['left'].set_linewidth(1.0)
-    ax.spines['right'].set_linewidth(1.0)
-    ax.spines['top'].set_linewidth(1.0)
-    ax.spines['bottom'].set_linewidth(1.0)
-   
+    if "noframe" in kwargs and kwargs["noframe"]:
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+    else:
+        ax.spines['left'].set_linewidth(1.0)
+        ax.spines['right'].set_linewidth(1.0)
+        ax.spines['top'].set_linewidth(1.0)
+        ax.spines['bottom'].set_linewidth(1.0)
+
+
     #ax.axhline(linewidth=4, color="g") draw a line along x-axis
     #plt.grid() # add grid
     #plt.set_axis_bgcolor('white')
@@ -206,6 +278,11 @@ if __name__ == '__main__':
     
     import libdmet.utils.logger as log
     import libdmet.dmet.abinitioBCS as dmet
+    from matplotlib import rc
+    rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+    ## for Palatino and other serif fonts use:
+    #rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
     LatSize = [1, 1]
     ImpSize = [1, 1]
     Lat = dmet.Square3BandSymm(*(LatSize + ImpSize))
@@ -214,13 +291,36 @@ if __name__ == '__main__':
     #Lat = dmet.SquareLattice(*(LatSize + ImpSize))
     nscsites = Lat.supercell.nsites
 
-    plt = plot_lattice(Lat)
+    Cu_list = [0, 3, 6, 9]
+    Oi_list = [2, 5, 8, 11]
+    Oo_list = [1, 4, 7, 10]
+    Oa_list = [12, 13, 14, 15]
 
-    rab = (np.random.random((nscsites, nscsites)) - 0.5) * 0.01
-    idx_list = [0, 3, 6, 9]
-    plt = plot_pairing(plt, Lat, rab, idx_list, bond_thr=2.1)
-    plt = plot_atom(plt, [1.0, 0.0], rad=0.4, color='C3')
-    plt = plot_spin(plt, [1.0, 0.0], -0.3)
-    plt = plot_name(plt, [1.0, 1.0], "Cu")
-    #plt = pairing_bond(plt, (0.0, 0.0), (1.0, 0.0), 0.005)
+    Oa_pos = [[4.0, 1.0], [1.0, 0.0], [0.0, 3.0], [3.0, 4.0]]
+
+    
+    #plt = plot_lattice(Lat, noframe=True, xleft=-0.5, xright=2.5, yleft=-0.5, yright=2.5)
+    plt = plot_lattice(Lat, noframe=True)
+    plt = plot_atom_all(plt, Lat, Cu_list, [0.9]*len(Cu_list), ['gold']*len(Cu_list))
+    plt = plot_atom_all(plt, Lat, Oi_list, [0.3]*len(Oi_list), ['C3']*len(Oi_list))
+    plt = plot_atom_all(plt, Lat, Oo_list, [0.3]*len(Oo_list), ['C3']*len(Oo_list))
+    #plt = plot_atom(plt, [1.0, 0.0], rad=0.3, color='white')
+    plt = plot_name(plt, [1.0, 0.4], "$\mathbf{Cu}$", fontsize=25)
+    plt = plot_name(plt, [2.0, 0.4], "$\mathbf{O}$", fontsize=25)
+
+#    ax = plt.gca()
+#
+#    rab = (np.random.random((nscsites, nscsites)) - 0.5) * 0.01
+#    idx_list = [0, 3, 6, 9]
+#    #plt = plot_pairing(plt, Lat, rab, idx_list, bond_thr=2.1)
+#    #plt = plot_spin(plt, [1.0, 0.0], -0.3)
+#    plt = plot_name(plt, [0.7, 1.25], "$\mathbf{U_{d}}$", fontsize=25)
+#    #plt = pairing_bond(plt, (0.0, 0.0), (1.0, 0.0), 0.005)
+#    r_list = [[1.0, 0.0], [0.0, 1.0], [1.0, 2.0], [2.0, 1.0]]
+#    phase_list = ['up', 'right', 'up', 'right']
+#    for r, ph in zip(r_list, phase_list):
+#        plot_p_orb(plt, ax, r, direct=ph)
+#    
+#    plot_d_orb(plt, ax, [1.0, 1.0], direct=ph)
+    #plt.savefig('symmtrized-cluster.png', dpi=600)
     plt.show()
