@@ -161,6 +161,12 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     rho_Oi = rho_Oi_a + rho_Oi_b
     rho_Oo = rho_Oo_a + rho_Oo_b
 
+    print "rho_Cu_a"
+    print rho_Cu_a
+    print "rho_Cu_b"
+    print rho_Cu_b
+    print 
+
     print "rho_Cu"
     print rho_Cu
     print "rho_Oi"
@@ -213,12 +219,12 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     #rab = (np.random.random((nscsites, nscsites)) - 0.5) * 0.01
     #idx_list = [0, 3, 6, 9]
     #plt = plot_atom(plt, [1.0, 0.0], rad=0.4, color='C3')
-    plt = plot_pairing_by_pos(plt, Lat, rab, Cu_list, bond_thr=2.1, bond_min=0.01) # Cu-Cu pairing
+    plt, dwv1 = plot_pairing_by_pos(plt, Lat, rab, Cu_list, bond_thr=2.1, bond_min=0.01) # Cu-Cu pairing
     #plt = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
     #        bond_thr=2.0+0.01, bond_min=2.0-0.01) # O-O pairing
     #plt = plot_pairing_by_pos(plt, Lat, rab, Cu_list + Oi_list + Oo_list + Oa_list, \
     #        bond_thr=1.42, bond_min=0.0) # nearest neighbor pairing
-    plt = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
+    plt, dwv2 = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
             bond_thr=2.0+0.01, bond_min=2.0-0.01) # O-O pairing
 
     
@@ -236,12 +242,12 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     #plt.savefig('Cu-Cu-pairing.pdf', format='pdf', facecolor=None, edgecolor=None)
 
 
-    exit()
+    #exit()
 
 
-    dwv = 0.25*(d01+d23-d02-d13)
-
-    return afm,dwv
+    #dwv = 0.25*(d01+d23-d02-d13)
+    return abs(afm), dwv1+dwv2
+    #return afm,dwv
 
 
 

@@ -193,7 +193,7 @@ def plot_pairing_by_pos(plt, lattice, rab, idx_list, bond_thr = 2.1, bond_min=0.
     print "DWV"
     print dwv
     #exit()
-    return plt
+    return plt, dwv
 
 def plot_lattice(lattice, **kwargs):
     color_list = ['gold', 'C3']
