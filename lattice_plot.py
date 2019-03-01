@@ -19,6 +19,9 @@ import random as rd
 import operator
 from time import time
 
+
+#print(plt.rcParams.get('figure.figsize'))
+
 #from sklearn.metrics.pairwise import euclidean_distances
 #from sklearn.random_projection import johnson_lindenstrauss_min_dim
 #from sklearn.random_projection import SparseRandomProjection
@@ -214,7 +217,8 @@ def plot_lattice(lattice, **kwargs):
     #lat_coords[1][lat_coords[1] > lat_size[1] // 2] -= lat_size[1]
    
     #circle_rad = 0.5
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4.8, 4.8))
+    #fig, ax = plt.subplots()
     #plt.figure(facecolor="white")
     #ax = plt.gca()
     xmin = np.min(lat_coords[0])

@@ -11,6 +11,47 @@ def load_dmet_iter_npy(fname = './dmet_iter.npy'):
 def load_dmet_npy(fname = './dmet.npy'):
     return np.load(fname)
 
+def get_order_param_1band_UHF(GRhoImp, AFM_idx = [0, 1, 2, 3]):
+    
+    AFM_idx_flatten = np.array(AFM_idx).flatten()
+
+    rdm_a = GRhoImp[0][np.ix_(AFM_idx_flatten, AFM_idx_flatten)]
+    rdm_b = GRhoImp[1][np.ix_(AFM_idx_flatten, AFM_idx_flatten)]
+
+    m0 = 0.5 * (rdm_a[0,0]-rdm_b[0,0])
+    m3 = 0.5 * (rdm_a[3,3]-rdm_b[3,3])
+    m1 = 0.5 * (rdm_a[1,1]-rdm_b[1,1])
+    m2 = 0.5 * (rdm_a[2,2]-rdm_b[2,2])
+    afm = 0.25 * (m0 + m3 - m1 - m2)
+    
+    return abs(afm)
+
+def get_order_param_1band(GRhoImp, AFM_idx = [0, 1, 2, 3]):
+    limp = GRhoImp.shape[0] / 2
+
+    AFM_idx_flatten = np.array(AFM_idx).flatten()
+    ra = GRhoImp[:limp,:limp]
+    rb = np.eye(limp) - GRhoImp[limp:,limp:]
+    rab = GRhoImp[:limp,limp:]
+    
+    rdm_a = GRhoImp[:limp,:limp][np.ix_(AFM_idx_flatten, AFM_idx_flatten)]
+    rdm_b = np.eye(len(AFM_idx_flatten)) - GRhoImp[limp:,limp:][np.ix_(AFM_idx_flatten, AFM_idx_flatten)]
+    rdm_ab = GRhoImp[:limp, limp:][np.ix_(AFM_idx_flatten, AFM_idx_flatten)]
+
+    m0 = 0.5 * (rdm_a[0,0]-rdm_b[0,0])
+    m3 = 0.5 * (rdm_a[3,3]-rdm_b[3,3])
+    m1 = 0.5 * (rdm_a[1,1]-rdm_b[1,1])
+    m2 = 0.5 * (rdm_a[2,2]-rdm_b[2,2])
+    afm = 0.25 * (m0 + m3 - m1 - m2)
+
+    s = 0.5**0.5
+    d01 = s*(rdm_ab[0,1]+rdm_ab[1,0])
+    d23 = s*(rdm_ab[2,3]+rdm_ab[3,2])
+    d02 = s*(rdm_ab[0,2]+rdm_ab[2,0])
+    d13 = s*(rdm_ab[1,3]+rdm_ab[3,1])
+    dwv = 0.25*(d01+d23-d02-d13)
+    return abs(afm), abs(dwv)
+
 def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     limp = GRhoImp.shape[0] / 2
 
@@ -222,7 +263,7 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     plt, dwv1 = plot_pairing_by_pos(plt, Lat, rab, Cu_list, bond_thr=2.1, bond_min=0.01) # Cu-Cu pairing
     #plt = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
     #        bond_thr=2.0+0.01, bond_min=2.0-0.01) # O-O pairing
-    #plt = plot_pairing_by_pos(plt, Lat, rab, Cu_list + Oi_list + Oo_list + Oa_list, \
+    #plt, _ = plot_pairing_by_pos(plt, Lat, rab, Cu_list + Oi_list + Oo_list + Oa_list, \
     #        bond_thr=1.42, bond_min=0.0) # nearest neighbor pairing
     plt, dwv2 = plot_pairing_by_pos(plt, Lat, rab, Oi_list + Oo_list + Oa_list, \
             bond_thr=2.0+0.01, bond_min=2.0-0.01) # O-O pairing
@@ -233,8 +274,13 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     plot_spin_all(plt, Lat, Oo_list, m_Oo, scal=4.5)
 
     cwd = os.getcwd().split('/')
+    cwd[-2] = "Hanke-full-PM"
+    cwd[-1] = '0.0'
     #plt = pairing_bond(plt, (0.0, 0.0), (1.0, 0.0), 0.005)
     #plt.show()
+    #plt.savefig('Cu-Cu-Hy-rand.png', dpi=400)
+    
+    
     #plt.savefig('Cu-Cu-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
     #plt.savefig('O-O-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
     #plt.savefig('nearest-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
