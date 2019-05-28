@@ -1,8 +1,9 @@
 #! /usr/bin/env python
+
 """
 lattice_plot.py
-a python module for plot lattice model.
-written by Zhihao Cui zcui@caltech.edu
+A python module for plot lattice model.
+Zhihao Cui zhcui0408@gmail.com
 """
 
 import os, sys
@@ -10,30 +11,15 @@ import numpy as np
 import scipy.linalg as la
 import itertools as it
 
-# import the implementation of the matrix factorization that consider bias
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
-from collections import defaultdict
-import random as rd
-import operator
-from time import time
-
-
 #print(plt.rcParams.get('figure.figsize'))
-
-#from sklearn.metrics.pairwise import euclidean_distances
-#from sklearn.random_projection import johnson_lindenstrauss_min_dim
-#from sklearn.random_projection import SparseRandomProjection
-#from sklearn.datasets import fetch_20newsgroups_vectorized
-#from sklearn.datasets import load_digits
-#from sklearn.metrics.pairwise import euclidean_distances
-
 #plt.style.use('ggplot')
 
 # TODO
-# 2. circle size
-# 4. test pure hubbard pairing pattern 
+# 1. circle size
+# 2. test pure hubbard pairing pattern 
 
 def plot_name(plt, r, name, fontsize=15, **kwargs):
     plt.text(r[0], r[1], name, horizontalalignment='center', verticalalignment='center', \
@@ -101,8 +87,6 @@ def plot_d_orb(plt, ax, r, direct='up'):
     else:
         plot_p_orb(plt, ax, r, direct='up', phase=["-", "-"])
         plot_p_orb(plt, ax, r, direct='left', phase=["+", "+"])
-
-
 
 def plot_spin(plt, r, ms, scal=4.0, **kwargs):
     if ms > 0.0:
@@ -267,7 +251,6 @@ def plot_lattice(lattice, **kwargs):
         ax.spines['right'].set_linewidth(1.0)
         ax.spines['top'].set_linewidth(1.0)
         ax.spines['bottom'].set_linewidth(1.0)
-
 
     #ax.axhline(linewidth=4, color="g") draw a line along x-axis
     #plt.grid() # add grid

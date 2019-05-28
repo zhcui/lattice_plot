@@ -1,6 +1,5 @@
 #! /usr/bin/env python 
 
-
 import numpy as np
 import h5py
 from lattice_plot import *
@@ -71,12 +70,6 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     afm = 0.25 * (m0 + m3 - m1 - m2)
 
     s = 0.5**0.5
-    #d01 = s*(rdm_ab[0,1]+rdm_ab[1,0])
-    #d23 = s*(rdm_ab[2,3]+rdm_ab[3,2])
-    #d02 = s*(rdm_ab[0,2]+rdm_ab[2,0])
-    #d13 = s*(rdm_ab[1,3]+rdm_ab[3,1])
-    #dwv = 0.25*(d01+d23-d02-d13)
-
 
     #
     #
@@ -255,7 +248,6 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     plt = plot_atom_by_pos(plt, Oa_pos, 2.0-rho_Oa, ['C3']*len(Oa_pos), alpha=0.55)
     plt = plot_spin_by_pos(plt, Oa_pos, m_Oo, alpha=0.55)
     
-
     #print rab
     #rab = (np.random.random((nscsites, nscsites)) - 0.5) * 0.01
     #idx_list = [0, 3, 6, 9]
@@ -280,21 +272,15 @@ def get_order_param_3band(GRhoImp, AFM_idx = [0, 3, 9, 6]):
     #plt.show()
     #plt.savefig('Cu-Cu-Hy-rand.png', dpi=400)
     
-    
     #plt.savefig('Cu-Cu-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
     #plt.savefig('O-O-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
     #plt.savefig('nearest-%s-%s.png'%(cwd[-2], cwd[-1]), dpi=400)
     #plt.savefig('Cu-Cu-pairing.eps')
     #plt.savefig('Cu-Cu-pairing.pdf', format='pdf', facecolor=None, edgecolor=None)
 
-
     #exit()
 
-
-    #dwv = 0.25*(d01+d23-d02-d13)
     return abs(afm), dwv1+dwv2
-    #return afm,dwv
-
 
 
 if __name__ == '__main__':
